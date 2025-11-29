@@ -247,7 +247,7 @@ def compare_optimization_methods(model, target_wavelength, iterations):
 def optimize_wavelength_cli():
     parser = argparse.ArgumentParser(description='Optimize Claude-light RGB values for a target wavelength using Gemini API, LHS, or Bayesian Optimization.')
     parser.add_argument('--wavelength', type=str, required=True, help='The target wavelength to optimize (e.g., 515nm).')
-    parser.add_argument('--iterations', type=int, default=5, help='Number of optimization iterations for Gemini/Bayesian or samples for LHS.')
+    parser.add_argument('--iterations', type=int, default=10, help='Number of optimization iterations for Gemini/Bayesian or samples for LHS.')
     parser.add_argument('--strategy', type=int, choices=[1, 2, 3, 4, 5], help='Optimization strategy: 1=Gemini, 2=LHS, 3=Bayesian, 4=Compare, 5=Exit')
     args = parser.parse_args()
 
