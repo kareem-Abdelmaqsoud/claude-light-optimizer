@@ -10,6 +10,7 @@ setup(
         'numpy',
         'pandas',
         'scipy', # Added scipy for Latin Hypercube Sampling
+        'scikit-optimize', # Added for Bayesian Optimization
     ],
     entry_points={
         'console_scripts': [
