@@ -27,7 +27,7 @@ If the `GEMINI_API_KEY` environment variable is not set, the script will prompt 
 To optimize for a specific wavelength (e.g., '515nm'), run the following command:
 
 ```bash
-claude-optimize --wavelength 515nm
+claude-optimize --wavelength 630nm
 ```
 
 After running the command, you will be prompted to choose an optimization strategy and specify the number of iterations.
@@ -42,29 +42,31 @@ Choose an optimization strategy:
 4. Compare Gemini, LHS, and Bayesian
 5. Exit
 Enter your choice (1-5): 1
-How many Gemini iterations would you like to run (default: 5)? 3
+How many Gemini iterations would you like to run (default: 10)? 3
 DEBUG: Entering perform_gemini_optimization_loop (version with underscore functions and explanation).
 
 --- Starting Gemini Optimization (3 iterations) ---
 
 --- Iteration 1/3 ---
-Gemini suggested R=0.00, G=1.00, B=0.00
-Gemini's reasoning: 515nm light falls squarely within the green portion of the visible spectrum. Since the objective is to maximize output at this specific wavelength and a neutral input previously yielded a negative result, the reasoning is to directly provide pure, full-intensity green light ([0.0, 1.0, 0.0]), eliminating any non-contributing or potentially detrimental red and blue components.
-Measured 515nm output: 63820
-New best found: RGB=[0.0, 1.0, 0.0], Output=63820
+Gemini suggested R=1.00, G=0.00, B=0.00
+Gemini's reasoning: The 630nm wavelength falls squarely within the red spectrum. To maximize output at this specific wavelength, the most direct approach is to provide the maximum possible input in the red channel while eliminating other colors. The previous `[0.5, 0.5, 0.5]` setting, which is a balanced mix of red, green, and blue, proved demonstrably ineffective with a negative output, indicating that green and blue light likely dilute or interfere with the desired red light production. Therefore, `[1.0, 0.0, 0.0]` isolates and maximizes the red component, aiming for optimal 630nm stimulation.
+Measured 630nmnm output: 29388
+New best found: RGB=[1.0, 0.0, 0.0], Output=29388
 
 --- Iteration 2/3 ---
-Gemini suggested R=0.00, G=1.00, B=0.00
-Gemini's reasoning: The previous iteration yielded a high output with pure green light, suggesting this is an effective direction. Further iterations will continue to refine around this optimal green value, or explore minor adjustments if the system exhibits non-linear responses, but the primary focus remains on maximizing the green component for 515nm.
-Measured 515nm output: 63820
+Gemini suggested R=1.00, G=1.00, B=1.00
+Gemini's reasoning: My suggestion of `[1.0, 1.0, 1.0]` ensures the red LED, the primary source of 630nm light, is at its maximum intensity, preserving the 29388 output observed with `[1.0, 0.0, 0.0]`. Activating the green and blue LEDs simultaneously does not diminish the red output and may contribute a marginal amount to the 630nm band due to spectral overlap or broad emission curves, thereby activating every potential source within the RGB system for the absolute maximum total output.
+Measured 630nmnm output: 31420
+New best found: RGB=[1.0, 1.0, 1.0], Output=31420
 
 --- Iteration 3/3 ---
-Gemini suggested R=0.00, G=1.00, B=0.00
-Gemini's reasoning: Given the consistent high output with pure green light, the model continues to suggest [0.0, 1.0, 0.0] as the optimal RGB combination for maximizing 515nm output. This indicates a strong correlation between the green component and the target wavelength, with no further improvements found by varying other components.
-Measured 515nm output: 63820
+Gemini suggested R=1.00, G=1.00, B=1.00
+Gemini's reasoning: My suggestion of [1.0, 1.0, 1.0] is based on it being the current highest-performing RGB combination, having produced the maximum observed 630nm output of 31420. Since full intensity across all channels has already yielded the best result so far, further exploration has not yet identified a superior configuration, making this the optimal setting discovered.
+Measured 630nmnm output: 31430
+New best found: RGB=[1.0, 1.0, 1.0], Output=31430
 
-Final Best RGB found: R=0.00, G=1.00, B=0.00
-Highest 515nm output: 63820
+Final Best RGB found: R=1.00, G=1.00, B=1.00
+Highest 630nmnm output: 31430
 ```
 
 ### Example: Latin Hypercube Sampling (LHS)
@@ -77,25 +79,20 @@ Choose an optimization strategy:
 4. Compare Gemini, LHS, and Bayesian
 5. Exit
 Enter your choice (1-5): 2
-How many LHS samples would you like to run (default: 5)? 5
+How many LHS samples would you like to run (default: 10)? 3
 
---- Starting Latin Hypercube Sampling (5 samples) ---
-LHS Experiment 1/5: R=0.83, G=0.27, B=1.00
-Measured 515nm output: 18109
-New best found: RGB=[0.83, 0.27, 1.00], Output=18109
-LHS Experiment 2/5: R=0.46, G=0.19, B=0.76
-Measured 515nm output: 13012
-LHS Experiment 3/5: R=0.17, G=0.64, B=0.20
-Measured 515nm output: 40911
-New best found: RGB=[0.17, 0.64, 0.20], Output=40911
-LHS Experiment 4/5: R=0.60, G=0.44, B=0.09
-Measured 515nm output: 28552
-LHS Experiment 5/5: R=0.30, G=0.81, B=0.47
-Measured 515nm output: 52054
-New best found: RGB=[0.30, 0.81, 0.47], Output=52054
+--- Starting Latin Hypercube Sampling (3 samples) ---
+LHS Experiment 1/3: R=0.11, G=0.89, B=0.87
+Measured 630nmnm output: 5153
+New best found: RGB=[np.float64(0.10966564799163663), np.float64(0.894803723242147), np.float64(0.8716652806488474)], Output=5153
+LHS Experiment 2/3: R=0.72, G=0.13, B=0.55
+Measured 630nmnm output: 21605
+New best found: RGB=[np.float64(0.7208864018424125), np.float64(0.1257803740174972), np.float64(0.5546725528493721)], Output=21605
+LHS Experiment 3/3: R=0.59, G=0.50, B=0.16
+Measured 630nmnm output: 17951
 
-Final Best RGB found: R=0.30, G=0.81, B=0.47
-Highest 515nm output: 52054
+Final Best RGB found: R=0.72, G=0.13, B=0.55
+Highest 630nmnm output: 21605
 ```
 
 ### Example: Bayesian Optimization
@@ -108,13 +105,13 @@ Choose an optimization strategy:
 4. Compare Gemini, LHS, and Bayesian
 5. Exit
 Enter your choice (1-5): 3
-How many Bayesian optimization iterations would you like to run (minimum: 10, default: 5)? 10
+How many Bayesian optimization iterations would you like to run (minimum: 10, default: 10)? 10
 
 --- Starting Bayesian Optimization (10 iterations) ---
-Bayesian Optimization finished. Best RGB: [0.0, 1.0, 0.0], Best Output: 63820
+Bayesian Optimization finished. Best RGB: [0.8472517387841256, 0.6235636967859725, 0.38438170729269994], Best Output: 25799
 
-Final Best RGB found: R=0.00, G=1.00, B=0.00
-Highest 515nm output: 63820
+Final Best RGB found: R=0.85, G=0.62, B=0.38
+Highest 630nmnm output: 25799
 ```
 
 ### Example: Compare Gemini, LHS, and Bayesian
