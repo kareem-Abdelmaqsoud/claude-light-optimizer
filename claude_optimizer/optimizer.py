@@ -35,11 +35,17 @@ def claude_light_measure(r, g, b):
         print(f"Claude-light API Call Failed: {e}")
         return None
 
-def _gemini_suggest_rgb(model, best_rgb, best_output, target_wavelength):
-    """Prompts Gemini for new RGB values."""
+def _gemini_suggest_rgb(model, current_rgb, current_output, best_rgb, best_output, target_wavelength, history):
+    """Prompts Gemini for new RGB values, encouraging exploration with full history."""
+    history_str = "\n".join([f"RGB: {h[0]}, Output: {h[1]}" for h in history])
     prompt = f"""
-    Current best RGB for {target_wavelength}nm is {best_rgb} with output {best_output}.
-    Suggest new R, G, B values (between 0.0 and 1.0, inclusive, as floats) to maximize the {target_wavelength}nm output.
+    Here is the history of previous RGB values and their measured outputs for {target_wavelength}nm:
+    {history_str}
+
+    The last tried RGB was {current_rgb} with output {current_output}.
+    The overall best RGB found so far is {best_rgb} with output {best_output}.
+    Suggest *new and different* R, G, B values (between 0.0 and 1.0, inclusive, as floats) to maximize the {target_wavelength}nm output.
+    It is important to explore different combinations, even if the current best is good.
     Provide the values as a comma-separated string, e.g., "0.1,0.2,0.3".
     Do not include any other text in your response.
     """
@@ -64,7 +70,9 @@ def perform_gemini_optimization_loop(model, target_wavelength, initial_rgb, init
     """
     best_rgb = list(initial_rgb) # Ensure it's a mutable list
     best_output = initial_best_output
-    current_rgb = list(initial_rgb)
+    current_rgb = list(initial_rgb) # Track the RGB from the last iteration
+    current_output = initial_best_output # Track the output from the last iteration
+    history = [] # Store all previous (rgb, output) pairs
 
     print(f"\n--- Starting Gemini Optimization ({iterations} iterations) ---")
 
@@ -72,7 +80,7 @@ def perform_gemini_optimization_loop(model, target_wavelength, initial_rgb, init
         print(f"\n--- Iteration {i+1}/{iterations} ---")
         
         try:
-            suggested_rgb = _gemini_suggest_rgb(model, best_rgb, best_output, target_wavelength)
+            suggested_rgb = _gemini_suggest_rgb(model, current_rgb, current_output, best_rgb, best_output, target_wavelength, history)
             r, g, b = suggested_rgb
             print(f"Gemini suggested R={r:.2f}, G={g:.2f}, B={b:.2f}")
 
@@ -82,11 +90,16 @@ def perform_gemini_optimization_loop(model, target_wavelength, initial_rgb, init
             measurement = claude_light_measure(r, g, b)
 
             if measurement and target_wavelength in measurement['out']:
-                current_output = measurement['out'][target_wavelength]
-                print(f"Measured {target_wavelength}nm output: {current_output}")
+                measured_output = measurement['out'][target_wavelength]
+                print(f"Measured {target_wavelength}nm output: {measured_output}")
 
-                if current_output > best_output:
-                    best_output = current_output
+                # Update current_rgb and current_output for the next iteration's prompt
+                current_rgb = suggested_rgb
+                current_output = measured_output
+                history.append((current_rgb, current_output)) # Add to history
+
+                if measured_output > best_output:
+                    best_output = measured_output
                     best_rgb = suggested_rgb
                     print(f"New best found: RGB={best_rgb}, Output={best_output}")
             else:
@@ -94,9 +107,12 @@ def perform_gemini_optimization_loop(model, target_wavelength, initial_rgb, init
 
         except Exception as e:
             print(f"Error during Gemini interaction or parsing: {e}")
+            # Fallback: perturb current_rgb and reset current_output if an error occurs
             current_rgb = [max(0.0, min(1.0, val + np.random.uniform(-0.1, 0.1))) for val in current_rgb]
-            best_rgb = current_rgb
-            best_output = -1
+            current_output = -1 # Reset output to a low value to encourage exploration
+            history.append((current_rgb, current_output)) # Add to history even on error
+            # If an error occurs, we might also want to reset best_rgb/best_output if they were based on a faulty run
+            # For now, we'll keep best_rgb/best_output as they are, assuming they were valid before the error.
 
     return best_rgb, best_output
 
