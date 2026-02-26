@@ -1,6 +1,6 @@
 # Claude Optimizer
 
-A Python package to find optimal RGB values for the claude-light device using the Gemini API.
+A Python package to find optimal RGB values for the claude-light device using the Gemini API. This claude-light device was built by Prof. John Kitchin to learn about running remote experiments, analyzing data, automation, design of experiments, and more. You can find more information here: https://github.com/jkitchin/claude-light
 
 ## Installation
 
